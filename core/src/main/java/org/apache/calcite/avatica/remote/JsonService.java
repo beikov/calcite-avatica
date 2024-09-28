@@ -111,6 +111,15 @@ public abstract class JsonService extends AbstractService {
     }
   }
 
+  @Override
+  public ResultSetResponse apply(UDTsRequest request) {
+    try {
+      return finagle(decode(apply(encode(request)), ResultSetResponse.class));
+    } catch (IOException e) {
+      throw handle(e);
+    }
+  }
+
   public ResultSetResponse apply(ColumnsRequest request) {
     try {
       return finagle(decode(apply(encode(request)), ResultSetResponse.class));

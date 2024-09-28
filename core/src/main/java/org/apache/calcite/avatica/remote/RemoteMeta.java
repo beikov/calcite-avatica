@@ -206,6 +206,38 @@ class RemoteMeta extends MetaImpl {
         });
   }
 
+  @Override
+  public MetaResultSet getUDTs(
+      ConnectionHandle ch,
+      String catalog,
+      Pat schemaPattern,
+      Pat typeNamePattern,
+      int[] types) {
+    return connection.invokeWithRetries(
+        new CallableWithoutException<MetaResultSet>() {
+          public MetaResultSet call() {
+            final List<Integer> typesList;
+            if (types != null) {
+              typesList = new ArrayList<>(types.length);
+              for (int i = 0; i < types.length; i++) {
+                typesList.add(types[i]);
+              }
+            } else {
+              typesList = null;
+            }
+            final Service.ResultSetResponse response =
+                service.apply( new Service.UDTsRequest(
+                    ch.id,
+                    catalog,
+                    schemaPattern.s,
+                    typeNamePattern.s,
+                    typesList
+                ) );
+            return toResultSet(MetaUdt.class, response);
+          }
+        });
+  }
+
   @Override public MetaResultSet getTypeInfo(final ConnectionHandle ch) {
     return connection.invokeWithRetries(
         new CallableWithoutException<MetaResultSet>() {

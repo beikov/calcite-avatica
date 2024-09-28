@@ -181,6 +181,30 @@ public class LocalService implements Service {
     return toResponse(resultSet);
   }
 
+  @Override
+  public ResultSetResponse apply(UDTsRequest request) {
+    final Meta.ConnectionHandle ch =
+        new Meta.ConnectionHandle(request.connectionId);
+    final int[] types;
+    if ( request.types == null ) {
+      types = null;
+    } else {
+      types = new int[request.types.size()];
+      List<Integer> integers = request.types;
+      for ( int i = 0; i < integers.size(); i++ ) {
+        types[i] = integers.get( i );
+      }
+    }
+    final Meta.MetaResultSet resultSet = meta.getUDTs(
+        ch,
+        request.catalog,
+        Meta.Pat.of(request.schemaPattern),
+        Meta.Pat.of(request.typeNamePattern),
+        types
+    );
+    return toResponse(resultSet);
+  }
+
   public ResultSetResponse apply(ColumnsRequest request) {
     final Meta.ConnectionHandle ch =
         new Meta.ConnectionHandle(request.connectionId);

@@ -72,6 +72,11 @@ public class JsonHandlerTest {
       return null;
     }
 
+    @Override
+    public ResultSetResponse apply(UDTsRequest request) {
+      return null;
+    }
+
     @Override public ResultSetResponse apply(ColumnsRequest request) {
       return null;
     }

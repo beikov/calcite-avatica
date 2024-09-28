@@ -58,6 +58,19 @@ message TableTypesRequest {
   string connection_id = 1;
 }
 
+// Request for Meta#getUDTs()
+message UDTsRequest {
+  string catalog = 1;
+  string schema_pattern = 2;
+  string type_name_pattern = 3;
+  repeated int32 types = 4;
+  bool has_types = 5; // Having an empty type_list is distinct from a null type_list
+  string connection_id = 6;
+  bool has_catalog = 7;
+  bool has_schema_pattern = 8;
+  bool has_type_name_pattern = 9;
+}
+
 // Request for Meta#getColumns(String, org.apache.calcite.avatica.Meta.Pat,
 //   org.apache.calcite.avatica.Meta.Pat, org.apache.calcite.avatica.Meta.Pat).
 message ColumnsRequest {

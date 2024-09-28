@@ -53,6 +53,11 @@ public abstract class ProtobufService extends AbstractService {
     return finagle((ResultSetResponse) _apply(request));
   }
 
+  @Override
+  public ResultSetResponse apply(UDTsRequest request) {
+    return finagle((ResultSetResponse) _apply(request));
+  }
+
   @Override public ResultSetResponse apply(ColumnsRequest request) {
     return finagle((ResultSetResponse) _apply(request));
   }

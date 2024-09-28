@@ -62,6 +62,7 @@ public interface Service {
   ResultSetResponse apply(TablesRequest request);
   ResultSetResponse apply(TableTypesRequest request);
   ResultSetResponse apply(TypeInfoRequest request);
+  ResultSetResponse apply(UDTsRequest request);
   ResultSetResponse apply(ColumnsRequest request);
   PrepareResponse apply(PrepareRequest request);
   ExecuteResponse apply(ExecuteRequest request);
@@ -123,6 +124,7 @@ public interface Service {
       @JsonSubTypes.Type(value = TablesRequest.class, name = "getTables"),
       @JsonSubTypes.Type(value = TableTypesRequest.class, name = "getTableTypes"),
       @JsonSubTypes.Type(value = TypeInfoRequest.class, name = "getTypeInfo"),
+      @JsonSubTypes.Type(value = UDTsRequest.class, name = "getUDTs"),
       @JsonSubTypes.Type(value = ColumnsRequest.class, name = "getColumns"),
       @JsonSubTypes.Type(value = ExecuteRequest.class, name = "execute"),
       @JsonSubTypes.Type(value = PrepareRequest.class, name = "prepare"),
@@ -572,6 +574,142 @@ public interface Service {
       return o == this
           || o instanceof TableTypesRequest
           && Objects.equals(connectionId, ((TableTypesRequest) o).connectionId);
+    }
+  }
+
+  /**
+   * Request for {@link Meta#getTableTypes(Meta.ConnectionHandle)}.
+   */
+  class UDTsRequest extends Request {
+    private static final FieldDescriptor CONNECTION_ID_DESCRIPTOR = Requests.UDTsRequest.
+        getDescriptor().findFieldByNumber(Requests.UDTsRequest.CONNECTION_ID_FIELD_NUMBER);
+    private static final FieldDescriptor CATALOG_DESCRIPTOR = Requests.UDTsRequest.
+        getDescriptor().findFieldByNumber(Requests.UDTsRequest.CATALOG_FIELD_NUMBER);
+    private static final FieldDescriptor SCHEMA_PATTERN_DESCRIPTOR = Requests.UDTsRequest.
+        getDescriptor().findFieldByNumber(Requests.UDTsRequest.SCHEMA_PATTERN_FIELD_NUMBER);
+    private static final FieldDescriptor TYPE_NAME_PATTERN_DESCRIPTOR = Requests.UDTsRequest.
+        getDescriptor().findFieldByNumber(Requests.UDTsRequest.TYPE_NAME_PATTERN_FIELD_NUMBER);
+    private static final FieldDescriptor TYPES_DESCRIPTOR = Requests.UDTsRequest.
+        getDescriptor().findFieldByNumber(Requests.UDTsRequest.TYPES_FIELD_NUMBER);
+
+    public final String connectionId;
+    public final String catalog;
+    public final String schemaPattern;
+    public final String typeNamePattern;
+    public final List<Integer> types;
+
+    public UDTsRequest() {
+      this.connectionId = null;
+      this.catalog = null;
+      this.schemaPattern = null;
+      this.typeNamePattern = null;
+      this.types = null;
+    }
+
+    @JsonCreator
+    public UDTsRequest(
+        @JsonProperty("connectionId") String connectionId,
+        @JsonProperty("catalog") String catalog,
+        @JsonProperty("schemaPattern") String schemaPattern,
+        @JsonProperty("typeNamePattern") String typeNamePattern,
+        @JsonProperty("types") List<Integer> types) {
+      this.connectionId = connectionId;
+      this.catalog = catalog;
+      this.schemaPattern = schemaPattern;
+      this.typeNamePattern = typeNamePattern;
+      this.types = types;
+    }
+
+    @Override Response accept(Service service) {
+      return service.apply(this);
+    }
+
+    @Override Request deserialize(Message genericMsg) {
+      final Requests.UDTsRequest msg = ProtobufService.castProtobufMessage(genericMsg,
+                                                                             Requests.UDTsRequest.class);
+
+      String connectionId = null;
+      if (msg.hasField(CONNECTION_ID_DESCRIPTOR)) {
+        connectionId = msg.getConnectionId();
+      }
+
+      String catalog = null;
+      if (msg.hasField(CATALOG_DESCRIPTOR)) {
+        catalog = msg.getCatalog();
+      } else if (msg.getHasCatalog()) {
+        catalog = "";
+      }
+
+      String schemaPattern = null;
+      if (msg.hasField(SCHEMA_PATTERN_DESCRIPTOR)) {
+        schemaPattern = msg.getSchemaPattern();
+      } else if (msg.getHasSchemaPattern()) {
+        schemaPattern = "";
+      }
+
+      String typeNamePattern = null;
+      if (msg.hasField(TYPE_NAME_PATTERN_DESCRIPTOR)) {
+        typeNamePattern = msg.getTypeNamePattern();
+      } else if (msg.getHasTypeNamePattern()) {
+        typeNamePattern = "";
+      }
+
+      // Cannot determine if a value was set for a repeated field. Must use an extra boolean
+      // parameter to distinguish an empty and null typeList.
+      List<Integer> typeList = null;
+      if (msg.getHasTypes()) {
+        typeList = msg.getTypesList();
+      }
+
+      return new UDTsRequest(connectionId, catalog, schemaPattern, typeNamePattern, typeList);
+    }
+
+    @Override Requests.UDTsRequest serialize() {
+      Requests.UDTsRequest.Builder builder = Requests.UDTsRequest.newBuilder();
+
+      if (null != connectionId) {
+        builder.setConnectionId(connectionId);
+      }
+      if (null != catalog) {
+        builder.setCatalog(catalog);
+        builder.setHasCatalog(true);
+      }
+      if (null != schemaPattern) {
+        builder.setSchemaPattern(schemaPattern);
+        builder.setHasSchemaPattern(true);
+      }
+      if (null != typeNamePattern) {
+        builder.setTypeNamePattern(typeNamePattern);
+        builder.setHasTypeNamePattern(true);
+      }
+      if (null != types) {
+        builder.setHasTypes(true);
+        builder.addAllTypes(types);
+      } else {
+        builder.setHasTypes(false);
+      }
+
+      return builder.build();
+    }
+
+    @Override public int hashCode() {
+      int result = 1;
+      result = p(result, connectionId);
+      result = p(result, catalog);
+      result = p(result, schemaPattern);
+      result = p(result, typeNamePattern);
+      result = p(result, types);
+      return result;
+    }
+
+    @Override public boolean equals(Object o) {
+      return o == this
+          || o instanceof UDTsRequest
+          && Objects.equals(connectionId, ((UDTsRequest) o).connectionId)
+          && Objects.equals(catalog, ((UDTsRequest) o).catalog)
+          && Objects.equals(schemaPattern, ((UDTsRequest) o).schemaPattern)
+          && Objects.equals(typeNamePattern, ((UDTsRequest) o).typeNamePattern)
+          && Objects.equals(types, ((UDTsRequest) o).types);
     }
   }
 

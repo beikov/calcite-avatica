@@ -520,7 +520,18 @@ public class JdbcMeta implements ProtobufMeta {
 
   public MetaResultSet getUDTs(ConnectionHandle ch, String catalog, Pat schemaPattern,
       Pat typeNamePattern, int[] types) {
-    return null;
+    try {
+      final ResultSet rs = getConnection( ch.id ).getMetaData().getUDTs(
+          catalog,
+          schemaPattern.s,
+          typeNamePattern.s,
+          types
+      );
+      int stmtId = registerMetaStatement(rs);
+      return JdbcResultSet.create(ch.id, stmtId, rs);
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public MetaResultSet getSuperTypes(ConnectionHandle ch, String catalog, Pat schemaPattern,
