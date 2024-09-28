@@ -233,6 +233,9 @@ class JdbcResultSet extends Meta.MetaResultSet {
       }
     case Types.STRUCT:
       Struct struct = resultSet.getObject(j + 1, Struct.class);
+      if (null == struct) {
+        return null;
+      }
       Object[] attrs = struct.getAttributes();
       List<Object> list = new ArrayList<>(attrs.length);
       for (Object o : attrs) {

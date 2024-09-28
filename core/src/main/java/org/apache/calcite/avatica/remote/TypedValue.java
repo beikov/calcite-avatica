@@ -32,6 +32,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.UnsafeByteOperations;
 
+import org.apache.calcite.avatica.util.StructImpl;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Array;
@@ -743,6 +745,16 @@ public class TypedValue {
         list.add(listElement);
       }
       return list;
+    case STRUCT:
+      final List<Common.TypedValue> protoAttrs = protoValue.getArrayValueList();
+      final List<Object> attrsList = new ArrayList<>(protoAttrs.size());
+      for (Common.TypedValue protoElement : protoAttrs) {
+        // Deserialize the TypedValue protobuf into the JDBC type
+        TypedValue listElement = TypedValue.fromProto(protoElement);
+        // Must preserve the TypedValue so serial/jdbc/local conversion can work as expected
+        attrsList.add(listElement);
+      }
+      return new StructImpl(attrsList);
     case OBJECT:
       if (protoValue.getNull()) {
         return null;
@@ -861,6 +873,19 @@ public class TypedValue {
     } else if (null == o) {
       writeToProtoWithType(builder, o, Common.Rep.NULL);
       return Common.Rep.NULL;
+    } else if (o instanceof StructImpl) {
+      builder.setType(Common.Rep.STRUCT);
+      StructImpl s = (StructImpl) o;
+      try {
+        for (Object attribute : s.getAttributes()) {
+          Common.TypedValue.Builder attributeElementBuilder = Common.TypedValue.newBuilder();
+          toProto(attributeElementBuilder, attribute);
+          builder.addArrayValue(attributeElementBuilder.build());
+        }
+      } catch (SQLException e) {
+        throw new RuntimeException("Could not serialize STRUCT", e);
+      }
+      return Common.Rep.STRUCT;
     // Unhandled
     } else {
       throw new RuntimeException("Unhandled type in Frame: " + o.getClass());

@@ -333,7 +333,7 @@ public enum SqlType {
   NVARCHAR(Types.NVARCHAR, String.class),
   LONGNVARCHAR(Types.LONGNVARCHAR, String.class),
   NCLOB(Types.NCLOB, NClob.class),
-  ROW(Types.STRUCT, Object.class),
+//  ROW(Types.STRUCT, Object.class),
   OTHER(Types.OTHER, Object.class),
   CURSOR(2012, Object.class),
   TIME_WITH_TIMEZONE(2013, String.class),
